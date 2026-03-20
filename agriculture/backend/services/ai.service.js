@@ -13,7 +13,7 @@ export const classifyIntent = async (text, lang) => {
     return { intent: "mandi_price", crop: "wheat", location: "unknown" };
   }
 
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
   const prompt = `
 You are an intent classification system for a farming voice assistant.
@@ -37,7 +37,7 @@ Return ONLY valid JSON like this, with no markdown formatting or backticks:
   try {
     const result = await model.generateContent(prompt);
     let jsonStr = result.response.text().trim();
-    
+
     // Clean up potential markdown blocks
     if (jsonStr.startsWith("\`\`\`json")) {
       jsonStr = jsonStr.replace(/^\`\`\`json/, "").replace(/\`\`\`$/, "").trim();
