@@ -86,7 +86,7 @@ Clone the repository and follow these steps:
 │   ├── frontend/         # React application (Vite template)
 │   │   └── src/          # Components, Hooks & UI Logic
 │   └── QUICKSTART.md     # Detailed setup guide
-└── README.md             # This file
+└── README.md             # this file
 ```
 
 ---
