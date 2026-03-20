@@ -1,4 +1,4 @@
-/*import { classifyIntent } from '../services/ai.service.js';
+import { classifyIntent } from '../services/ai.service.js';
 import { getMandiPrice } from '../services/mandi.service.js';
 import { getWeatherForecast } from '../services/weather.service.js';
 import { logQuery } from '../services/db.service.js';
@@ -58,8 +58,4 @@ export const analyzeIntent = async (req, res) => {
     console.error("Analysis Error:", error);
     res.status(500).json({ error: "Failed to analyze intent" });
   }
-};
-*/
-export const analyzeIntent = async (req, res) => {
-  res.json({ message: "Backend working ✅" });
 };
