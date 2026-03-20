@@ -271,6 +271,7 @@ const App = () => {
     <div className="layout-container">
       <div className="bg-shape shape1"></div>
       <div className="bg-shape shape2"></div>
+      <div className="bg-shape shape3"></div>
 
       <div className="app-wrapper">
         <header className="app-header">
@@ -287,23 +288,34 @@ const App = () => {
         <div className="app-body">
           <main className="conversation-panel">
             <div className="response-container">
-              {recentUserMessage && (
-                <div className="user-query">
-                  "{recentUserMessage.content}"
-                </div>
-              )}
+              <div className="message-history">
+                {recentUserMessage && (
+                  <div className="user-query">
+                    "{recentUserMessage.content}"
+                  </div>
+                )}
 
-              <div className="ai-avatar-wrapper">
-                <div className={`ai-avatar ${isSpeaking ? 'speaking' : ''}`}>
-                  <Sprout size={28} color="#fff" />
+                <div className="ai-avatar-wrapper">
+                  <div className={`ai-avatar ${isSpeaking ? 'speaking' : ''}`}>
+                    <Sprout size={28} color="#fff" />
+                  </div>
+                  {isSpeaking && <span className="status-text">{t.speaking}</span>}
+                  {isRecording && (
+                    <div className="waveform">
+                      <div className="waveform-bar"></div>
+                      <div className="waveform-bar"></div>
+                      <div className="waveform-bar"></div>
+                      <div className="waveform-bar"></div>
+                      <div className="waveform-bar"></div>
+                    </div>
+                  )}
                 </div>
-                {isSpeaking && <span className="status-text">{t.speaking}</span>}
-              </div>
 
-              <div className="response-bubble">
-                {intentMutation.isPending
-                  ? <span className="thinking-dots">Thinking<span>.</span><span>.</span><span>.</span></span>
-                  : lastSystemMessage?.content}
+                <div className="response-bubble">
+                  {intentMutation.isPending
+                    ? <span className="thinking-dots">{lang === 'hi' ? 'सोच रहा हूँ' : 'Thinking'}<span>.</span><span>.</span><span>.</span></span>
+                    : lastSystemMessage?.content}
+                </div>
               </div>
             </div>
 
@@ -392,6 +404,12 @@ const App = () => {
             </div>
           </aside>
         </div>
+      </div>
+
+      <div className="spoiler-watermark">
+        <a href="https://github.com/schallten" target="_blank" rel="noopener noreferrer" className="spoiler-trigger">
+          github.com/schallten ;)
+        </a>
       </div>
     </div>
   );
