@@ -1,14 +1,18 @@
 import axios from 'axios';
+import { logger } from './logger.service.js';
 
-export const getWeatherForecast = async (location) => {
+export const getWeatherForecast = async (location, coords) => {
   try {
-    const loc = location || 'Delhi';
+    let loc = location || 'Delhi';
+    if (!location && coords) {
+      loc = `${coords.lat},${coords.lon}`;
+    }
     const url = `http://wttr.in/${encodeURIComponent(loc)}?format=j1`;
-    console.log(`[WeatherService] Fetching weather from: ${url}`);
+    logger.info(`Fetching weather data for: ${loc}`);
     
     const response = await axios.get(url);
     const current = response.data.current_condition[0];
-    console.log(`[WeatherService] Received: ${current.temp_C}°C, ${current.weatherDesc[0].value}`);
+    logger.debug(`Loaded weather condition: ${current.weatherDesc[0].value}`);
     
     let advice = 'Conditions look normal.';
     const temp = parseInt(current.temp_C);
