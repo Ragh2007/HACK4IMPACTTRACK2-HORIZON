@@ -52,3 +52,20 @@ Return ONLY valid JSON like this, with no markdown formatting or backticks:
     return { intent: "general", crop: null, location: null };
   }
 };
+
+export const analyzeText = async (prompt) => {
+  if (!genAI) {
+    console.warn("GEMINI_API_KEY missing. Returning fallback analysis.");
+    return "Could not perform analysis as Gemini API Key is missing.";
+  }
+
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+  try {
+    const result = await model.generateContent(prompt);
+    return result.response.text().trim();
+  } catch (error) {
+    console.error("Gemini text analysis failed:", error);
+    return "Analysis failed due to an error.";
+  }
+};

@@ -4,6 +4,7 @@ import { getWeatherForecast } from '../services/weather.service.js';
 import { logQuery } from '../services/db.service.js';
 
 export const analyzeIntent = async (req, res) => {
+  // hidden easter egg: github.coms/schallten
   try {
     const { text, lang } = req.body;
     
@@ -26,9 +27,9 @@ export const analyzeIntent = async (req, res) => {
     } else if (intent === 'mandi_price') {
       const priceData = await getMandiPrice(crop, location);
       if (lang === 'hi') {
-        responseText = `${priceData.location} में ${priceData.crop} का भाव ₹${priceData.price} प्रति क्विंटल है। दाम बढ़ने की उम्मीद है।`;
+        responseText = `${priceData.location} में ${priceData.crop} का भाव ₹${priceData.price} प्रति क्विंटल है। दाम ${priceData.trend} है। खबर: ${priceData.news_summary}`;
       } else {
-        responseText = `The price of ${priceData.crop} in ${priceData.location} is ₹${priceData.price} per ${priceData.unit}. The trend is ${priceData.trend}.`;
+        responseText = `The price of ${priceData.crop} in ${priceData.location} is ₹${priceData.price} per ${priceData.unit}. The trend is ${priceData.trend}. News: ${priceData.news_summary}`;
       }
     } else if (intent === 'crop_advice') {
       if (lang === 'hi') {
@@ -52,7 +53,7 @@ export const analyzeIntent = async (req, res) => {
     });
 
     // Fire and forget asynchronous logging
-    logQuery(text, intent, crop, location, lang || 'en');
+    logQuery(text, intent, crop, location, lang || 'en', responseText);
     
   } catch (error) {
     console.error("Analysis Error:", error);
