@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 import { Mic, MicOff, Sprout, CloudSun, TrendingUp, HandCoins, Globe, AlertCircle, ArrowRight } from 'lucide-react';
+import { useMutation } from '@tanstack/react-query';
+import { analyzeIntent } from './services/api';
 
 const TRANSLATIONS = {
   en: {
@@ -50,67 +52,7 @@ const TRANSLATIONS = {
   }
 };
 
-const extractCropName = (text, lang) => {
-  const lower = text.toLowerCase();
-  if (lang === 'hi') {
-    // Look for word before "ka bhav", "ke daam", "price", etc.
-    const match = lower.match(/([a-zA-Z\u0900-\u097F]+)\s(?:का भाव|के दाम|का रेट|के प्राइस)/);
-    if (match) return match[1];
-    // hardcoded common checks
-    if (lower.includes('टमाटर')) return 'टमाटर';
-    if (lower.includes('गेहूँ')) return 'गेहूँ';
-    if (lower.includes('तरबूज')) return 'तरबूज';
-    if (lower.includes('कपास')) return 'कपास';
-  } else {
-    const match1 = lower.match(/price of\s([a-zA-Z]+)/);
-    if (match1) return match1[1];
-    const match2 = lower.match(/([a-zA-Z]+)\sprice/);
-    if (match2) return match2[1];
-    if (lower.includes('watermelon')) return 'watermelon';
-    if (lower.includes('tomato')) return 'tomato';
-    if (lower.includes('wheat')) return 'wheat';
-    if (lower.includes('cotton')) return 'cotton';
-  }
-  return null;
-}
-
-const generateMockPrice = (cropStr) => {
-  if (!cropStr) return 2200;
-  // generates a consistent price based on string characters
-  let hash = 0;
-  for (let i = 0; i < cropStr.length; i++) {
-    hash = cropStr.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return 1500 + (Math.abs(hash) % 5000);
-}
-
-const processVoiceIntent = async (text, lang) => {
-  const lowercaseText = text.toLowerCase();
-  const t = TRANSLATIONS[lang];
-  
-  if (lowercaseText.includes('weather') || lowercaseText.includes('mausam') || lowercaseText.includes('मौसम')) {
-    return t.weatherResp;
-  } else if (lowercaseText.includes('beej') || lowercaseText.includes('seed') || lowercaseText.includes('बुवाई')) {
-    return t.seedResp;
-  } else if (lowercaseText.includes('trend') || lowercaseText.includes('rujhan') || lowercaseText.includes('रुझान')) {
-    return lang === 'hi' 
-       ? "गेहूँ और धान जैसे मुख्य फसलों के दाम अगले सप्ताह 3% बढ़ने की उम्मीद है।" 
-       : "Prices for major crops like wheat and paddy are expected to rise by 3% next week.";
-  } else if (lowercaseText.includes('price') || lowercaseText.includes('bhav') || lowercaseText.includes('भाव') || lowercaseText.includes('दाम')) {
-    const crop = extractCropName(text, lang) || (lang === 'hi' ? 'फसल' : 'crop');
-    const expectedPrice = generateMockPrice(crop);
-    
-    if (lang === 'hi') {
-      return `आज मंडी में ${crop} का औसत मूल्य ₹${expectedPrice} प्रति क्विंटल है। बाजार में इसके 2% बढ़ने की उम्मीद है।`;
-    } else {
-      return `Today's average price for ${crop} is ₹${expectedPrice}/Qtl. It is expected to rise by 2% in the market.`;
-    }
-  } else {
-    // Default dynamic response integrating user utterance
-    if (lang === 'hi') return `मैंने सुना: "${text}"। ${t.unknownResp}`;
-    return `I heard: "${text}". ${t.unknownResp}`;
-  }
-};
+// Client-side mock logic removed in favor of backend API calls
 
 const App = () => {
   const [lang, setLang] = useState('en');
@@ -209,14 +151,31 @@ const App = () => {
     }
   };
 
+  const intentMutation = useMutation({
+    mutationFn: ({text, currentLang}) => analyzeIntent(text, currentLang),
+    onSuccess: (data) => {
+      const respText = data.response;
+      setMessages(prev => [...prev, { role: 'system', content: respText }]);
+      speak(respText);
+    },
+    onError: (error) => {
+      console.error("API Error:", error);
+      const errorMsg = lang === 'hi' ? "क्षमा करें, सर्वर से जुड़ने में त्रुटि आई।" : "Sorry, an error occurred connecting to the server.";
+      setMessages(prev => [...prev, { role: 'system', content: errorMsg }]);
+      speak(errorMsg);
+    }
+  });
+
   const handleUserMessage = async (transcript) => {
+    // Auto language detection based on Hindi Unicode range
+    const isHindi = /[\u0900-\u097F]/.test(transcript);
+    const currentLang = isHindi ? 'hi' : 'en';
+    if (currentLang !== lang) {
+      setLang(currentLang);
+    }
+    
     setMessages(prev => [...prev, { role: 'user', content: transcript }]);
-    
-    // Process intent dynamically
-    const aiResponse = await processVoiceIntent(transcript, lang);
-    
-    setMessages(prev => [...prev, { role: 'system', content: aiResponse }]);
-    speak(aiResponse);
+    intentMutation.mutate({ text: transcript, currentLang });
   };
 
   const handleSubmit = (e) => {
