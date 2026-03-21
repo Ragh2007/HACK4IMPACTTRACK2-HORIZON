@@ -8,10 +8,16 @@ import { logger } from './services/logger.service.js';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+
+
+const PORT = process.env.PORT || 8080;
 
 app.use(cors());
 app.use(express.json());
+app.get('/', (req, res) => {
+  res.send('API is running ');
+});
+
 
 // Simple request logging middleware
 app.use((req, res, next) => {
@@ -25,6 +31,7 @@ app.use((req, res, next) => {
 
 app.use('/api', apiRoutes);
 
-app.listen(PORT, () => {
-  logger.info(`Server started on http://localhost:${PORT}`);
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on port ${PORT}`);
 });
