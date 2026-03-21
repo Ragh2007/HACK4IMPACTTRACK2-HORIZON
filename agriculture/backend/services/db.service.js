@@ -12,13 +12,13 @@ if (supabaseUrl && supabaseKey) {
   console.warn("Supabase credentials missing. Database logging disabled.");
 }
 
-export const logQuery = async (queryText, intent, crop, location, lang) => {
+export const logQuery = async (queryText, intent, crop, location, lang, responseText) => {
   if (!supabase) return;
   try {
     await supabase
       .from('user_queries')
       .insert([
-        { query_text: queryText, intent, crop, location, language: lang }
+        { query_text: queryText, intent, crop, location, language: lang, response_text: responseText }
       ]);
   } catch (err) {
     console.error("Failed to log query to Supabase:", err);

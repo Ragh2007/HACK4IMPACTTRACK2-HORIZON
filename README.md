@@ -18,72 +18,55 @@ Small-scale farmers, especially those with low digital literacy, face challenges
 [![Google Gemini](https://img.shields.io/badge/AI-Google_Gemini-orange?logo=google-gemini)](https://ai.google.dev/)
 [![Supabase](https://img.shields.io/badge/Database-Supabase-3FCF8E?logo=supabase)](https://supabase.com/)
 
-**Agri-Voice** is a voice-driven, AI-integrated decision engine designed to bridge the digital literacy gap for Indian farmers. By providing real-time mandi prices, weather forecasts, and expert crop advice through simple voice commands in **Hindi and English**, Agri-Voice empowers farmers to make data-driven decisions and eliminate middlemen.
+**Agri-Voice** is a voice-driven, AI-integrated decision engine designed specifically for Indian farmers. It bridges the digital literacy gap by providing real-time mandi prices, weather forecasts, and expert crop advice through voice commands in **Hindi and English**.
+
+---
+
+## 🚀 API & Services Documentation
+
+The application relies on several external APIs to provide real-time data and AI capabilities.
+
+### 1. Google Gemini AI (`gemini-2.5-flash-lite`)
+- **Purpose**: Powering intent classification, text extraction from search results, and multilingual speech-to-text (STT).
+- **Location of Logic**: 
+  - `backend/services/ai.service.js` (Classification and analysis)
+  - `backend/services/stt.service.js` (Audio transcription)
+- **Stored In**: `backend/.env` under `GEMINI_API_KEY`.
+- **How to Change**: [Get a key here](https://aistudio.google.com/) and update the `.env` file. To change the model version, update the `GEMINI_MODEL` or `STT_MODEL` constants in the respective service files.
+
+### 2. SerpApi (Google Search API)
+- **Purpose**: Fetching the latest mandi prices and agricultural news by searching the live web.
+- **Location of Logic**: `backend/services/mandi.service.js`.
+- **Stored In**: `backend/.env` under `SERPAPI_KEY`.
+- **How to Change**: [Get a key here](https://serpapi.com/) and update the `.env` file.
+
+### 3. wttr.in (Weather Forecast)
+- **Purpose**: Real-time location-aware weather forecasting and agricultural advice.
+- **Location of Logic**: `backend/services/weather.service.js`.
+- **Stored In**: No API key required (Open source).
+- **How to Change**: Modify the `getWeatherForecast` function; it currently pulls fresh JSON data from `wttr.in`.
+
+### 4. Supabase (Database & Logging)
+- **Purpose**: Logging farmer queries, intents, crops, and locations for trend analysis.
+- **Location of Logic**: `backend/services/db.service.js`.
+- **Stored In**: `backend/.env` under `SUPABASE_URL` and `SUPABASE_KEY`.
+- **How to Change**: Create a project on [Supabase.com](https://supabase.com/), create a `user_queries` table, and update your credentials in the `.env` file.
+
+### 5. Web Speech API (Browser Native)
+- **Purpose**: Providing Text-to-Speech (TTS) capabilities.
+- **Location of Logic**: `frontend/src/App.jsx` (`speak` function).
+- **Stored In**: Built into modern browsers (Chrome, Edge, Safari).
+- **How to Change**: You can modify the `targetLang`, `rate`, and `voice` selection in the `speak` function to adjust the speech quality or supported languages.
 
 ---
 
 ## ✨ Key Features
 
-- 🎙️ **Multi-lingual Voice Assistant**: Seamlessly switch between Hindi and English; optimized for natural Indian accents and Hinglish queries.
-- 💰 **Real-time Mandi Prices**: Get the latest market rates for crops across various locations using AI-driven structured data extraction.
-- 🌦️ **Precision Weather Forecasts**: Location-aware weather updates with practical agricultural advice (e.g., "Good time for irrigation").
-- 🧠 **AI-Powered Intent Analysis**: Uses Google's **Gemini AI** to understand complex queries and extract crop names, locations, and intents.
-- 🚀 **Performant Architecture**: Built with React 19 and TanStack Query for a snappy, lightning-fast user experience.
-- 📊 **Query Analytics**: Logs user queries to Supabase for future trend analysis and personalized advice.
-
----
-
-## 🛠️ Tech Stack
-
-### Frontend
-- **Framework**: [React 19](https://react.dev/) with [Vite](https://vitejs.dev/)
-- **State Management & Caching**: [TanStack Query (React Query) v5](https://tanstack.com/query/latest)
-- **Icons**: [Lucide React](https://lucide.dev/)
-- **Styling**: Modern, Clean, and Accessible UI
-
-### Backend
-- **Runtime**: [Node.js](https://nodejs.org/) with [Express](https://expressjs.com/)
-- **AI Engine**: [Google Gemini Pro](https://ai.google.dev/) (`@google/generative-ai`)
-- **Database**: [Supabase (PostgreSQL)](https://supabase.com/)
-- **External Services**: [Firebase](https://firebase.google.com/) (Auth/Admin), Custom Weather & Mandi APIs
-
----
-
-## 🚀 Getting Started
-
-To run the full-stack application locally:
-
-### 1. Prerequisites
-- Node.js installed on your system.
-- A Google Cloud account with Gemini API enabled.
-- A Supabase project (optional for logging).
-
-### 2. Setup Procedure
-
-Clone the repository and follow these steps:
-
-#### Backend Configuration
-1. Navigate to `agriculture/backend`.
-2. Create a `.env` file based on `example.env`.
-3. Fill in your API keys:
-   ```env
-   GEMINI_API_KEY=your_key_here
-   SUPABASE_URL=your_url
-   SUPABASE_KEY=your_key
-   ```
-4. Run the server:
-   ```bash
-   npm install
-   npm run dev
-   ```
-
-#### Frontend Configuration
-1. Navigate to `agriculture/frontend`.
-2. Run the development server:
-   ```bash
-   npm install
-   npm run dev
-   ```
+- 🎙️ **Multi-lingual Voice Assistant**: High-fidelity transcription for both Hindi and English with auto-language detection.
+- 💰 **Real-time Mandi Prices**: Live market values for crops across India via AI-powered web extraction.
+- 🌦️ **Precision Weather Forecasts**: Dynamic forecasts with actionable farming tips based on your GPS location.
+- 🧠 **AI-Powered Intent Analysis**: Deep semantic understanding that extracts crop names and locations from natural speech.
+- 💎 **Premium UI/UX**: State-of-the-art glassmorphism design with animated waveforms, smooth transitions, and mobile-first responsiveness.
 
 ---
 
@@ -91,31 +74,27 @@ Clone the repository and follow these steps:
 
 ```text
 ├── agriculture/
-│   ├── backend/          # Express API with Gemini integration
-│   │   ├── controllers/  # Intent analysis logic
-│   │   ├── routes/       # API endpoints
-│   │   └── services/     # AI, Mandi, Weather & DB service layers
+│   ├── backend/          # Node-Express logic
+│   │   ├── controllers/  # Intent analysis & Transcription handling
+│   │   ├── routes/       # API endpoints (/api/analyze-intent, /api/transcribe)
+│   │   ├── uploads/      # Temporary audio storage (auto-cleaned)
+│   │   └── services/     # Core logic (AI, Mandi, Weather, DB)
 │   ├── frontend/         # React application (Vite template)
-│   │   └── src/          # Components, Hooks & UI Logic
-│   └── QUICKSTART.md     # Detailed setup guide
-└── README.md             # this file
+│   │   └── src/          # Components & Premium CSS styles
 ```
 
 ---
 
-## 🗺️ Roadmap & Future Enhancements
+## 🛠️ Setup Procedure
 
-- [ ] **Phase 1**: Price trend graphs for historical analysis.
-- [ ] **Phase 2**: Crop growth predictor using weather and soil data.
-- [ ] **Phase 3**: Phone-number based authentication (perfect for rural connectivity).
-- [ ] **Phase 4**: Expansion to more regional languages (Marathi, Telugu, Punjabi).
+1. **Backend Configuration**:
+   - `cd agriculture/backend`
+   - Create `.env` from `example.env` and add your `GEMINI_API_KEY` and `SERPAPI_KEY`.
+   - `npm install && npm run dev`
+
+2. **Frontend Configuration**:
+   - `cd agriculture/frontend`
+   - `npm install && npm run dev`
 
 ---
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request or open an issue.
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+*Created with ❤️ by schallten*
