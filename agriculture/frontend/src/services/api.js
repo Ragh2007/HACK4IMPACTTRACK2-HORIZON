@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'https://hack4impacttrack2-horizon-production.up.railway.app/api';
-
+//const API_BASE_URL = 'https://hack4impacttrack2-horizon-production.up.railway.app/api';
+const API_BASE_URL = 'http://localhost:8080/api';
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -9,11 +9,11 @@ const apiClient = axios.create({
   },
 });
 
-export const analyzeIntent = async (text, lang, coords) => {
+export const analyzeIntent = async (text, lang, type = 'chat') => {
   const response = await apiClient.post('/analyze-intent', {
     text,
     lang,
-    coords,
+    type,
   });
   return response.data;
 };
